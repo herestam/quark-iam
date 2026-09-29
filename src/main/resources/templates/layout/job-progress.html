@@ -1,0 +1,8 @@
+{!
+  Progress bar used by every job row. Expects `job`.
+  `data-job-progress` is picked up by /js/app.js to update in place.
+!}
+<div class="progress" data-job-progress="{job.id}">
+    <div class="{ui.progressClass(job.status)}" style="width: {job.progressPercent}%"></div>
+</div>
+<span class="progress-label">{job.progressPercent}% &middot; {job.processedCount}/{job.totalCount}</span>

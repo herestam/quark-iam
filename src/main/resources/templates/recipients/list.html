@@ -1,0 +1,62 @@
+{#include layout/base.html}
+{#title}Recipients{/title}
+{#body}
+<header class="page-head">
+    <h1>Recipients</h1>
+    <a class="btn btn-ghost" href="/recipients/import">Import CSV</a>
+</header>
+
+<section class="panel">
+    <form method="get" action="/recipients" class="inline-form">
+        <input type="search" name="search" value="{search}" placeholder="Search email, name or company"
+               aria-label="Search recipients"/>
+        <button class="btn" type="submit">Search</button>
+        {#if search}<a class="btn btn-ghost" href="/recipients">Clear</a>{/if}
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Add a recipient</h2>
+    </div>
+    <form method="post" action="/recipients" class="inline-form">
+        <input type="email" name="email" required placeholder="jane.doe@example.com" aria-label="Email address"/>
+        <input type="text" name="name" placeholder="Jane Doe" aria-label="Name"/>
+        <input type="text" name="company" placeholder="Acme Corp" aria-label="Company"/>
+        <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+</section>
+
+<section class="panel">
+    {#if recipients.isEmpty()}
+        <div class="empty">
+            <p class="muted">No recipients match.</p>
+            <a class="btn" href="/recipients/import">Import a CSV instead</a>
+        </div>
+    {:else}
+        <table class="table">
+            <thead>
+            <tr><th>Email</th><th>Name</th><th>Company</th><th>Added</th><th></th></tr>
+            </thead>
+            <tbody>
+            {#for recipient in recipients}
+                <tr>
+                    <td>{recipient.email}</td>
+                    <td>{ui.dash(recipient.name)}</td>
+                    <td>{ui.dash(recipient.company)}</td>
+                    <td class="muted">{ui.date(recipient.createdAt)}</td>
+                    <td class="cell-actions">
+                        <form method="post" action="/recipients/{recipient.id}/delete"
+                              data-confirm="Remove {recipient.email}?">
+                            <button class="btn btn-small btn-danger" type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+        {#include layout/pager.html/}
+    {/if}
+</section>
+{/body}
+{/include}

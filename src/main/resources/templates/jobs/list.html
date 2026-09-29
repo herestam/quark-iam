@@ -1,0 +1,49 @@
+{#include layout/base.html}
+{#title}Jobs{/title}
+{#body}
+<header class="page-head">
+    <h1>Jobs</h1>
+</header>
+
+<section class="panel">
+    {#if jobs.isEmpty()}
+        <div class="empty">
+            <p class="muted">No jobs yet.</p>
+            <a class="btn btn-primary" href="/campaigns">Start one from a campaign</a>
+        </div>
+    {:else}
+        <table class="table" id="live-jobs" data-poll-interval="2000">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Campaign</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Sent</th>
+                <th>Failed</th>
+                <th>Duration</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for job in jobs}
+                <tr data-job-id="{job.id}">
+                    <td><a href="/jobs/{job.id}">{job.id}</a></td>
+                    <td>{ui.dash(job.campaignName)}</td>
+                    <td><span class="{ui.badge(job.status)}" data-field="status">{job.status}</span></td>
+                    <td class="cell-progress">{#include layout/job-progress.html job=job/}</td>
+                    <td data-field="successCount">{job.successCount}</td>
+                    <td data-field="failedCount">{job.failedCount}</td>
+                    <td class="muted">{ui.dash(job.duration)}</td>
+                    <td class="muted">{ui.ago(job.createdAt)}</td>
+                    <td class="cell-actions"><a class="btn btn-small" href="/jobs/{job.id}">Open</a></td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+        {#include layout/pager.html/}
+    {/if}
+</section>
+{/body}
+{/include}

@@ -1,0 +1,29 @@
+{!
+  Base layout. Every page includes this template and fills the {#body} block;
+  the sidebar, flash banner and asset tags are defined exactly once here.
+!}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{#insert title}Email Campaign Manager{/insert}</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/app.css"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#9993;</text></svg>"/>
+</head>
+<body>
+{#include layout/sidebar.html/}
+<main class="content">
+    {#if flash}
+        <div class="flash flash-{flash.type}" role="status">
+            <span>{flash.text}</span>
+            <button type="button" class="flash-close" data-dismiss-flash>&times;</button>
+        </div>
+    {/if}
+    {#insert body/}
+</main>
+<script src="/vendor/bootstrap/bootstrap.bundle.min.js" defer></script>
+<script src="/js/app.js" defer></script>
+</body>
+</html>

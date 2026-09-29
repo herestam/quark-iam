@@ -1,0 +1,19 @@
+{!
+  Reusable table pager. Expects `page`, `totalPages`, `hasPrevious`, `hasNext`
+  and `self` (the current path) so the query string survives pagination.
+!}
+{#if totalPages > 1}
+    <nav class="pager">
+        <span class="pager-info">
+            Page {page + 1} of {totalPages} &middot; {ui.number(total)} total
+        </span>
+        <span class="pager-links">
+            {#if hasPrevious}
+                <a class="btn btn-ghost" href="{params.url(self, 'page', page - 1, 'size', size)}">Previous</a>
+            {/if}
+            {#if hasNext}
+                <a class="btn btn-ghost" href="{params.url(self, 'page', page + 1, 'size', size)}">Next</a>
+            {/if}
+        </span>
+    </nav>
+{/if}

@@ -1,0 +1,77 @@
+{!
+  Template editor. The preview is rendered server side on submit so the author
+  sees exactly what the recipient will get.
+!}
+{#include layout/base.html}
+{#title}{#if editing}Edit template{:else}New template{/if}{/title}
+{#body}
+<header class="page-head">
+    <h1>{#if editing}Edit template{:else}New template{/if}</h1>
+    <a class="btn btn-ghost" href="/templates">Back</a>
+</header>
+
+<form method="post" action="/templates" class="form">
+    {#if editing}
+        <input type="hidden" name="id" value="{template.id}"/>
+    {/if}
+
+    <section class="panel">
+        <div class="field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" maxlength="200" required
+                   value="{name}" placeholder="Monthly newsletter"/>
+        </div>
+
+        <div class="field">
+            <label for="subject">Default subject</label>
+            <input id="subject" name="subject" type="text" maxlength="500" required value="{subject}"/>
+        </div>
+
+        <div class="field">
+            <span class="label">Available placeholders</span>
+            <p class="hint">
+                {#for variable in variables}<code>{variable}</code>{/for}
+                &mdash; only these are substituted, anything else is left untouched.
+            </p>
+        </div>
+
+        <div class="field">
+            <label for="htmlContent">HTML body</label>
+            <textarea id="htmlContent" name="htmlContent" rows="16" required
+                      spellcheck="false">{htmlContent}</textarea>
+        </div>
+
+        <div class="field">
+            <label for="textContent">Plain text body <span class="muted">(optional)</span></label>
+            <textarea id="textContent" name="textContent" rows="8" spellcheck="false">{textContent}</textarea>
+            <p class="hint">Generated from the HTML when left empty.</p>
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{#if editing}Save changes{:else}Create template{/if}</button>
+        <a class="btn btn-ghost" href="/templates">Cancel</a>
+    </div>
+</form>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Preview</h2>
+    </div>
+    <form method="post" action="/templates/preview-draft" target="preview-frame" class="inline-form">
+        <div class="field">
+            <label for="preview-name">Sample recipient name</label>
+            <input id="preview-name" name="name" type="text" value="Jane Doe"/>
+        </div>
+        <div class="field">
+            <label for="preview-company">Sample company</label>
+            <input id="preview-company" name="company" type="text" value="{company}" required/>
+        </div>
+        <input type="hidden" name="subject" value="{subject}"/>
+        <input type="hidden" name="htmlContent" value="{htmlContent}"/>
+        <input type="hidden" name="textContent" value="{textContent}"/>
+        <button class="btn" type="submit">Render preview</button>
+    </form>
+</section>
+{/body}
+{/include}

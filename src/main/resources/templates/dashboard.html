@@ -1,0 +1,100 @@
+{#include layout/base.html}
+{#title}Dashboard{/title}
+{#body}
+<header class="page-head">
+    <h1>Dashboard</h1>
+    <p class="muted">Email sending overview across every campaign and job.</p>
+</header>
+
+<section class="cards">
+    <div class="card">
+        <span class="card-label">Campaigns</span>
+        <span class="card-value">{ui.number(stats.totalCampaigns)}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Templates</span>
+        <span class="card-value">{ui.number(stats.totalTemplates)}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Recipients</span>
+        <span class="card-value">{ui.number(stats.totalRecipients)}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Jobs</span>
+        <span class="card-value">{ui.number(stats.totalJobs)}</span>
+        <span class="card-foot">
+            <span class="badge badge-running">{stats.runningJobs} running</span>
+            <span class="badge badge-paused">{stats.pausedJobs} paused</span>
+            <span class="badge badge-pending">{stats.pendingJobs} queued</span>
+        </span>
+    </div>
+    <div class="card">
+        <span class="card-label">Emails sent</span>
+        <span class="card-value card-ok">{ui.number(stats.sentEmails)}</span>
+        <span class="card-foot">
+            <span class="badge badge-failed">{ui.number(stats.failedEmails)} failed</span>
+            <span class="badge badge-pending">{ui.number(stats.pendingEmails)} pending</span>
+        </span>
+    </div>
+    <div class="card">
+        <span class="card-label">Finished jobs</span>
+        <span class="card-value">{ui.number(stats.completedJobs)}</span>
+        <span class="card-foot">
+            <span class="badge badge-cancelled">{stats.cancelledJobs} cancelled</span>
+            <span class="badge badge-failed">{stats.failedJobs} failed</span>
+        </span>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Recent jobs</h2>
+        <a class="btn btn-ghost" href="/jobs">View all</a>
+    </div>
+
+    {#if hasJobs}
+        <table class="table" id="live-jobs" data-poll-interval="2000">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Campaign</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Sent</th>
+                <th>Failed</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for job in jobs}
+                <tr data-job-id="{job.id}">
+                    <td><a href="/jobs/{job.id}">{job.id}</a></td>
+                    <td>{ui.dash(job.campaignName)}</td>
+                    <td><span class="{ui.badge(job.status)}">{job.status}</span></td>
+                    <td class="cell-progress">
+                        {#include layout/job-progress.html job=job/}
+                    </td>
+                    <td data-field="successCount">{job.successCount}</td>
+                    <td data-field="failedCount">{job.failedCount}</td>
+                    <td class="muted">{ui.ago(job.createdAt)}</td>
+                    <td class="cell-actions">
+                        <a class="btn btn-small" href="/jobs/{job.id}">Open</a>
+                    </td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+        <p class="muted small" data-poll-hint hidden>Live updates every 2 seconds.</p>
+    {:else}
+        <div class="empty">
+            <p>No jobs yet.</p>
+            <p class="muted">
+                Create a campaign, pick a template and an audience, then start a job to see it here.
+            </p>
+            <a class="btn btn-primary" href="/campaigns">Go to campaigns</a>
+        </div>
+    {/if}
+</section>
+{/body}
+{/include}

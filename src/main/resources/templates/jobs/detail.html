@@ -1,0 +1,153 @@
+{!
+  Job detail: live progress, per recipient status, and the worker log.
+  Rows carry data-job-id so app.js can patch counters without a full reload.
+!}
+{#include layout/base.html}
+{#title}Job {job.id}{/title}
+{#body}
+<header class="page-head">
+    <div>
+        <h1>Job {job.id}</h1>
+        <p class="muted">
+            Campaign <a href="/campaigns/{job.campaignId}">{ui.dash(job.campaignName)}</a>
+        </p>
+    </div>
+    <div class="head-actions">
+        <span class="{ui.badge(job.status)}" data-field="status">{job.status}</span>
+        <a class="btn btn-ghost" href="/jobs">All jobs</a>
+    </div>
+</header>
+
+<section class="panel" id="live-job-detail" data-job-id="{job.id}" data-poll-interval="1500">
+    <div class="panel-head">
+        <h2>Progress</h2>
+        <span class="muted" data-poll-hint hidden>Live updates enabled</span>
+    </div>
+
+    {#include layout/job-progress.html job=job/}
+
+    <div class="cards">
+        <div class="card"><span class="card-label">Total</span><span class="card-value" data-field="totalCount">{job.totalCount}</span></div>
+        <div class="card"><span class="card-label">Sent</span><span class="card-value card-ok" data-field="successCount">{job.successCount}</span></div>
+        <div class="card"><span class="card-label">Failed</span><span class="card-value card-bad" data-field="failedCount">{job.failedCount}</span></div>
+        <div class="card"><span class="card-label">Pending</span><span class="card-value" data-field="pendingCount">{job.pendingCount}</span></div>
+        <div class="card">
+            <span class="card-label">Duration</span>
+            <span class="card-value card-text">{ui.elapsed(job.startedAt, job.completedAt ?: job.cancelledAt)}</span>
+        </div>
+        <div class="card">
+            <span class="card-label">Started</span>
+            <span class="card-value card-text">{ui.instant(job.startedAt)}</span>
+        </div>
+    </div>
+
+    {#if job.errorMessage}
+        <div class="flash flash-error">
+            <span>{job.errorMessage}</span>
+        </div>
+    {/if}
+
+    <div class="job-actions">
+        {#if job.canPause}
+            <form method="post" action="/jobs/{job.id}/pause">
+                <button class="btn" type="submit">Pause</button>
+            </form>
+        {/if}
+        {#if job.canResume}
+            <form method="post" action="/jobs/{job.id}/resume">
+                <button class="btn btn-primary" type="submit">Resume</button>
+            </form>
+        {/if}
+        {#if job.canCancel}
+            <form method="post" action="/jobs/{job.id}/cancel"
+                  data-confirm="Cancel this job? Messages already handed to the server will still be delivered.">
+                <button class="btn btn-danger" type="submit">Cancel</button>
+            </form>
+        {/if}
+        {#if job.canRetry}
+            <form method="post" action="/jobs/{job.id}/retry"
+                  data-confirm="Queue every failed recipient for another attempt?">
+                <button class="btn" type="submit">Retry failed</button>
+            </form>
+        {/if}
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Recipients</h2>
+        <span class="muted">{ui.number(recipientTotal)} row(s)</span>
+    </div>
+
+    <nav class="filters">
+        <a class="chip{#if activeFilter == ''} chip-active{/if}" href="/jobs/{job.id}">All</a>
+        {#for filter in job.availableFilters}
+            <a class="chip{#if activeFilter == filter} chip-active{/if}"
+               href="/jobs/{job.id}?status={filter}">
+                {filter} ({counts.get(filter, 0)})
+            </a>
+        {/for}
+    </nav>
+
+    {#if recipients.isEmpty()}
+        <div class="empty"><p class="muted">Nothing to show for this filter.</p></div>
+    {:else}
+        <table class="table">
+            <thead>
+            <tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th><th>Attempts</th><th>Detail</th></tr>
+            </thead>
+            <tbody>
+            {#for recipient in recipients}
+                <tr>
+                    <td>{recipient.email}</td>
+                    <td>{ui.dash(recipient.name)}</td>
+                    <td>{ui.dash(recipient.company)}</td>
+                    <td><span class="{ui.badge(recipient.status)}">{recipient.status}</span></td>
+                    <td>{recipient.attemptCount}</td>
+                    <td class="muted small">
+                        {#if recipient.errorMessage}{recipient.errorMessage}{:else}{ui.instant(recipient.sentAt)}{/if}
+                    </td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+
+        {#if recipientTotalPages > 1}
+            <nav class="pager">
+                <span class="pager-info">Page {recipientPage + 1} of {recipientTotalPages}</span>
+                <span class="pager-links">
+                    {#if recipientPage > 0}
+                        <a class="btn btn-ghost"
+                           href="/jobs/{job.id}?status={activeFilter}&page={recipientPage - 1}">Previous</a>
+                    {/if}
+                    {#if (recipientPage + 1) * size < recipientTotal}
+                        <a class="btn btn-ghost"
+                           href="/jobs/{job.id}?status={activeFilter}&page={recipientPage + 1}">Next</a>
+                    {/if}
+                </span>
+            </nav>
+        {/if}
+    {/if}
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Worker log</h2>
+        <span class="muted">most recent {logs.size()}</span>
+    </div>
+    {#if logs.isEmpty()}
+        <div class="empty"><p class="muted">No log entries yet.</p></div>
+    {:else}
+        <ul class="log">
+            {#for entry in logs}
+                <li>
+                    <span class="muted small">{ui.instant(entry.createdAt)}</span>
+                    <span class="{ui.badge(entry.level)}">{entry.level}</span>
+                    <span>{entry.message}</span>
+                </li>
+            {/for}
+        </ul>
+    {/if}
+</section>
+{/body}
+{/include}

@@ -1,0 +1,56 @@
+{!
+  CSV import. The form re-renders with the result instead of redirecting so the
+  author can immediately see which rows were rejected and why.
+!}
+{#include layout/base.html}
+{#title}Import recipients{/title}
+{#body}
+<header class="page-head">
+    <h1>Import recipients</h1>
+    <a class="btn btn-ghost" href="/recipients">Back</a>
+</header>
+
+<section class="panel">
+    <p class="hint">{usage}</p>
+    <form method="post" action="/recipients/import" class="form">
+        <div class="field">
+            <label for="content">Paste your CSV</label>
+            <textarea id="content" name="content" rows="14" required spellcheck="false"
+                      placeholder="email,name,company&#10;jane@example.com,Jane Doe,Acme Corp">{content}</textarea>
+        </div>
+
+        <div class="field field-inline">
+            <label><input type="checkbox" name="hasHeader" value="true" {#if hasHeader}checked{/if}/> First row is a header</label>
+            <label><input type="checkbox" name="skipInvalid" value="true" {#if skipInvalid}checked{/if}/> Skip invalid rows instead of failing</label>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Import</button>
+        </div>
+    </form>
+</section>
+
+{#if result}
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Result</h2>
+        </div>
+        <div class="cards">
+            <div class="card"><span class="card-label">Submitted</span><span class="card-value">{result.submitted}</span></div>
+            <div class="card"><span class="card-label">Created</span><span class="card-value card-ok">{result.created}</span></div>
+            <div class="card"><span class="card-label">Updated</span><span class="card-value">{result.updated}</span></div>
+            <div class="card"><span class="card-label">Duplicates</span><span class="card-value">{result.skippedDuplicates}</span></div>
+        </div>
+
+        {#if result.hasErrors()}
+            <h3>Rejected rows</h3>
+            <ul class="errors">
+                {#for error in result.errors}<li>{error}</li>{/for}
+            </ul>
+        {/if}
+
+        <a class="btn btn-primary" href="/recipients">Go to recipients</a>
+    </section>
+{/if}
+{/body}
+{/include}

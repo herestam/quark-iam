@@ -1,0 +1,122 @@
+{#include layout/base.html}
+{#title}{campaign.name}{/title}
+{#body}
+<header class="page-head">
+    <div>
+        <h1>{campaign.name}</h1>
+        <p class="muted">{campaign.subject}</p>
+    </div>
+    <div class="head-actions">
+        <span class="{ui.badge(campaign.status)}">{campaign.status}</span>
+        <a class="btn btn-ghost" href="/campaigns/{campaign.id}/edit">Edit</a>
+        <a class="btn btn-ghost" href="/templates/{campaign.templateId}">Preview template</a>
+    </div>
+</header>
+
+<section class="cards">
+    <div class="card">
+        <span class="card-label">Recipients</span>
+        <span class="card-value">{campaign.recipientCount}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Jobs run</span>
+        <span class="card-value">{campaign.totalJobs}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Template</span>
+        <span class="card-value card-text">{ui.dash(campaign.templateName)}</span>
+    </div>
+    <div class="card">
+        <span class="card-label">Last updated</span>
+        <span class="card-value card-text">{ui.ago(campaign.updatedAt)}</span>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Send</h2>
+    </div>
+    <p class="muted">
+        Starting a job queues a background send. It returns immediately, keeps running if you
+        close this page, and can be paused or cancelled at any time.
+    </p>
+    <form method="post" action="/jobs/start" class="inline-form">
+        <input type="hidden" name="campaignId" value="{campaign.id}"/>
+        <button class="btn btn-primary" type="submit"
+                {#if campaign.recipientCount == 0}disabled{/if}>
+            Start job for {campaign.recipientCount} recipient(s)
+        </button>
+        {#if campaign.recipientCount == 0}
+            <span class="hint hint-warn">Pick at least one recipient first.</span>
+        {/if}
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Status</h2>
+    </div>
+    <form method="post" action="/campaigns/{campaign.id}/status" class="inline-form">
+        <select name="status" aria-label="Campaign status">
+            {#for status in statuses}
+                <option value="{status}" {#if campaign.status == status}selected{/if}>{status}</option>
+            {/for}
+        </select>
+        <button class="btn" type="submit">Update status</button>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Jobs for this campaign</h2>
+    </div>
+    {#if hasJobs}
+        <table class="table">
+            <thead>
+            <tr><th>#</th><th>Status</th><th>Progress</th><th>Sent</th><th>Failed</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+            {#for job in jobs}
+                <tr>
+                    <td><a href="/jobs/{job.id}">{job.id}</a></td>
+                    <td><span class="{ui.badge(job.status)}">{job.status}</span></td>
+                    <td class="cell-progress">{#include layout/job-progress.html job=job/}</td>
+                    <td>{job.successCount}</td>
+                    <td>{job.failedCount}</td>
+                    <td class="muted">{ui.ago(job.createdAt)}</td>
+                    <td class="cell-actions"><a class="btn btn-small" href="/jobs/{job.id}">Open</a></td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+    {:else}
+        <div class="empty"><p class="muted">This campaign has not been sent yet.</p></div>
+    {/if}
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Audience ({audience.size()})</h2>
+    </div>
+    {#if audience.isEmpty()}
+        <div class="empty">
+            <p class="muted">No recipients in this campaign.</p>
+            <a class="btn" href="/campaigns/{campaign.id}/edit">Choose recipients</a>
+        </div>
+    {:else}
+        <table class="table">
+            <thead><tr><th>Email</th><th>Name</th><th>Company</th></tr></thead>
+            <tbody>
+            {#for recipient in audience}
+                <tr>
+                    <td>{recipient.email}</td>
+                    <td>{ui.dash(recipient.name)}</td>
+                    <td>{ui.dash(recipient.company)}</td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+    {/if}
+</section>
+{/body}
+{/include}

@@ -1,0 +1,58 @@
+{#include layout/base.html}
+{#title}Templates{/title}
+{#body}
+<header class="page-head">
+    <h1>Templates</h1>
+    <a class="btn btn-primary" href="/templates/new">New template</a>
+</header>
+
+<section class="panel">
+    <form method="get" action="/templates" class="inline-form">
+        <input type="search" name="search" value="{search}" placeholder="Search name, subject or body"
+               aria-label="Search templates"/>
+        <button class="btn" type="submit">Search</button>
+        {#if search}<a class="btn btn-ghost" href="/templates">Clear</a>{/if}
+    </form>
+</section>
+
+<section class="panel">
+    {#if templates.isEmpty()}
+        <div class="empty">
+            <p class="muted">No templates match.</p>
+            <a class="btn btn-primary" href="/templates/new">Create a template</a>
+        </div>
+    {:else}
+        <table class="table">
+            <thead>
+            <tr><th>Name</th><th>Subject</th><th>Variables</th><th>Used by</th><th>Updated</th><th></th></tr>
+            </thead>
+            <tbody>
+            {#for template in templates}
+                <tr>
+                    <td><a href="/templates/{template.id}">{template.name}</a></td>
+                    <td>{ui.truncate(template.subject, 44)}</td>
+                    <td class="muted">
+                        {#for variable in template.variables}<code>{variable}</code>{/for}
+                    </td>
+                    <td>{template.usageCount} campaign(s)</td>
+                    <td class="muted">{ui.ago(template.updatedAt)}</td>
+                    <td class="cell-actions">
+                        <a class="btn btn-small" href="/templates/{template.id}">Preview</a>
+                        <a class="btn btn-small btn-ghost" href="/templates/{template.id}/edit">Edit</a>
+                        <form method="post" action="/templates/{template.id}/duplicate">
+                            <button class="btn btn-small btn-ghost" type="submit">Duplicate</button>
+                        </form>
+                        <form method="post" action="/templates/{template.id}/delete"
+                              data-confirm="Delete template &quot;{template.name}&quot;?">
+                            <button class="btn btn-small btn-danger" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+        <p class="muted small">{ui.number(total)} template(s)</p>
+    {/if}
+</section>
+{/body}
+{/include}

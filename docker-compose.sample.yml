@@ -1,0 +1,47 @@
+# =====================================================================
+# Single-file deployment for your Ubuntu server.
+#
+#   docker compose -f compose.yaml up -d
+#   docker compose -f compose.yaml logs -f
+#
+# No .env needed - edit the EDIT ME values below. The image is pulled
+# from Docker Hub and never built here.
+#
+# Uses host networking so the app can reach the PostgreSQL that already
+# runs on this server (127.0.0.1:5432). If your PostgreSQL is on a
+# different machine, just put its IP in DB_URL; host networking still
+# works. Because of host networking there is no "ports:" section - the
+# app listens directly on the server's port 8080.
+# =====================================================================
+
+services:
+
+  app:
+    image: dxtech2024/email-campaign-manager:latest
+    pull_policy: always
+    container_name: email-app
+    restart: unless-stopped
+    network_mode: host
+
+    environment:
+      # --- EDIT ME: your existing PostgreSQL ------------------------------
+      # Same host  -> 127.0.0.1     | Other host -> that server's IP/host
+      DB_URL: "jdbc:postgresql://127.0.0.1:5432/email_java"
+      DB_USERNAME: "localadmin"
+      DB_PASSWORD: "localadmin"
+
+      # --- EDIT ME: SMTP. Only seeds the first config; the UI wins after --
+      SMTP_HOST: "smtp.sendgrid.net"
+      SMTP_PORT: "587"
+      SMTP_USERNAME: "apikey"
+      SMTP_PASSWORD: ""
+      SMTP_FROM_EMAIL: "no-reply@localhost"
+      SMTP_FROM_NAME: "Email Campaign Manager"
+
+      # Background worker
+      APP_JOB_WORKER_ENABLED: "true"
+      APP_EMAIL_BATCH_SIZE: "10"
+      APP_EMAIL_DELAY_MS: "1000"
+
+    security_opt:
+      - no-new-privileges:true

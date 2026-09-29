@@ -1,0 +1,127 @@
+{!
+  Email provider settings. `password` is never populated: the stored secret
+  stays on the server and an empty field means "keep what is on file".
+!}
+{#include layout/base.html}
+{#title}Email settings{/title}
+{#body}
+<header class="page-head">
+    <h1>Email settings</h1>
+</header>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>SMTP / SendGrid</h2>
+        <span class="{ui.badge(config.provider)}">{config.provider}</span>
+        {#if config.active}<span class="badge badge-completed">active</span>{:else}<span class="badge badge-paused">inactive</span>{/if}
+    </div>
+
+    <form method="post" action="/settings/email" class="form">
+        <div class="field-row">
+            <div class="field">
+                <label for="provider">Provider</label>
+                <select id="provider" name="provider">
+                    {#for provider in providers}
+                        <option value="{provider}" {#if config.provider == provider}selected{/if}>{provider}</option>
+                    {/for}
+                </select>
+                <p class="hint">
+                    SendGrid uses SMTP: host <code>smtp.sendgrid.net</code>, port 587, user
+                    <code>apikey</code> and your API key as the password.
+                </p>
+            </div>
+            <div class="field">
+                <label for="active">Active configuration</label>
+                <label class="switch">
+                    <input type="checkbox" name="active" value="true" {#if config.active}checked{/if}/>
+                    <span>Use this configuration for sending</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="smtpHost">SMTP host</label>
+                <input id="smtpHost" name="smtpHost" type="text" required value="{config.smtpHost}"
+                       placeholder="smtp.example.com"/>
+            </div>
+            <div class="field field-narrow">
+                <label for="smtpPort">Port</label>
+                <input id="smtpPort" name="smtpPort" type="number" min="1" max="65535" required
+                       value="{config.smtpPort}"/>
+            </div>
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" value="{ui.dash(config.username)}"
+                       autocomplete="off"/>
+            </div>
+            <div class="field">
+                <label for="password">Password / API key</label>
+                <input id="password" name="password" type="password" value="" autocomplete="new-password"
+                       placeholder="{#if config.passwordSet}Leave blank to keep the stored secret{:else}Not set yet{/if}"/>
+                <p class="hint">
+                    {#if config.passwordSet}
+                        A secret is on file. It is never sent to the browser.
+                    {:else}
+                        No secret stored yet.
+                    {/if}
+                </p>
+            </div>
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="fromEmail">From address</label>
+                <input id="fromEmail" name="fromEmail" type="email" required value="{config.fromEmail}"/>
+            </div>
+            <div class="field">
+                <label for="fromName">From name</label>
+                <input id="fromName" name="fromName" type="text" value="{ui.dash(config.fromName)}"/>
+            </div>
+        </div>
+
+        <div class="field-row">
+            <div class="field field-narrow">
+                <label for="connectionTimeoutMs">Timeout (ms)</label>
+                <input id="connectionTimeoutMs" name="connectionTimeoutMs" type="number" min="1000"
+                       max="300000" value="{config.connectionTimeoutMs}"/>
+            </div>
+            <div class="field">
+                <span class="label">Transport security</span>
+                <label class="switch">
+                    <input type="checkbox" name="useTls" value="true" {#if config.useTls}checked{/if}/>
+                    <span>STARTTLS</span>
+                </label>
+                <label class="switch">
+                    <input type="checkbox" name="useSsl" value="true" {#if config.useSsl}checked{/if}/>
+                    <span>Implicit SSL (usually port 465)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save settings</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Verify</h2>
+    </div>
+    <div class="form-actions">
+        <form method="post" action="/settings/email/test-connection">
+            <button class="btn" type="submit">Test connection</button>
+        </form>
+    </div>
+    <form method="post" action="/settings/email/test-send" class="inline-form">
+        <input type="email" name="to" value="{testEmail}" required placeholder="you@example.com"
+               aria-label="Test recipient"/>
+        <button class="btn" type="submit">Send test message</button>
+    </form>
+</section>
+{/body}
+{/include}

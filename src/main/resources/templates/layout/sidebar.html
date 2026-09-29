@@ -1,0 +1,21 @@
+{! Sidebar navigation. `section` decides which entry is highlighted. !}
+<aside class="sidebar">
+    <div class="brand">
+        <span class="brand-mark">&#9993;</span>
+        <span class="brand-text">Campaign<br/>Manager</span>
+    </div>
+
+    <nav class="nav">
+        <a class="nav-item{#if section == 'DASHBOARD'} active{/if}" href="/">Dashboard</a>
+        <a class="nav-item{#if section == 'CAMPAIGNS'} active{/if}" href="/campaigns">Campaigns</a>
+        <a class="nav-item{#if section == 'TEMPLATES'} active{/if}" href="/templates">Templates</a>
+        <a class="nav-item{#if section == 'RECIPIENTS'} active{/if}" href="/recipients">Recipients</a>
+        <a class="nav-item{#if section == 'JOBS'} active{/if}" href="/jobs">Jobs</a>
+        <a class="nav-item{#if section == 'SETTINGS'} active{/if}" href="/settings/email">Email settings</a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/openapi" class="muted">OpenAPI</a>
+        <a href="/q/health" class="muted">Health</a>
+    </div>
+</aside>

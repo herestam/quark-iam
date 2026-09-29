@@ -1,0 +1,104 @@
+{!
+  Campaign editor, used for both create and edit.
+  Recipient ids travel as a comma separated hidden field, which keeps the form
+  working without any JavaScript.
+!}
+{#include layout/base.html}
+{#title}{#if editing}Edit campaign{:else}New campaign{/if}{/title}
+{#body}
+<header class="page-head">
+    <h1>{#if editing}Edit campaign{:else}New campaign{/if}</h1>
+    <a class="btn btn-ghost" href="/campaigns">Back</a>
+</header>
+
+<form method="post" action="/campaigns" class="form">
+    {#if editing}
+        <input type="hidden" name="id" value="{campaign.id}"/>
+    {/if}
+
+    <section class="panel">
+        <div class="field">
+            <label for="name">Campaign name</label>
+            <input id="name" name="name" type="text" maxlength="200" required
+                   value="{#if editing}{campaign.name}{/if}" placeholder="Spring product launch"/>
+        </div>
+
+        <div class="field">
+            <label for="subject">Email subject</label>
+            <input id="subject" name="subject" type="text" maxlength="500" required
+                   value="{#if editing}{campaign.subject}{/if}"
+                   placeholder="A quick look at what changed"/>
+            <p class="hint">
+                Supports the same <code>&#123;&#123;name&#125;&#125;</code>,
+                <code>&#123;&#123;email&#125;&#125;</code> and
+                <code>&#123;&#123;company&#125;&#125;</code> placeholders as the template.
+            </p>
+        </div>
+
+        <div class="field">
+            <label for="templateId">Template</label>
+            <select id="templateId" name="templateId" required>
+                <option value="">Choose a template&hellip;</option>
+                {#for template in templates}
+                    <option value="{template.id}"
+                            {#if editing && campaign.templateId == template.id}selected{/if}>
+                        {template.name}
+                    </option>
+                {/for}
+            </select>
+            {#if templates.isEmpty()}
+                <p class="hint hint-warn">
+                    No templates yet. <a href="/templates/new">Create one</a> first.
+                </p>
+            {/if}
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Audience</h2>
+            <span class="muted" data-selection-count>{#if editing}{campaign.recipientCount}{:else}0{/if} selected</span>
+        </div>
+
+        <input type="hidden" name="recipientIds" value="{selectedCsv}" data-recipient-ids/>
+
+        <div class="picker">
+            <div class="picker-head">
+                <input type="search" placeholder="Filter by email, name or company"
+                       data-recipient-filter aria-label="Filter recipients"/>
+                <button type="button" class="btn btn-ghost btn-small" data-select-all>Select all</button>
+                <button type="button" class="btn btn-ghost btn-small" data-select-none>Clear</button>
+            </div>
+
+            {#if available.isEmpty()}
+                <p class="empty">
+                    No recipients yet.
+                    <a href="/recipients">Add recipients</a> or
+                    <a href="/recipients/import">import a CSV</a>.
+                </p>
+            {:else}
+                <ul class="picker-list" data-recipient-list>
+                    {#for recipient in available}
+                        <li data-filter-text="{recipient.email} {recipient.name} {recipient.company}">
+                            <label>
+                                <input type="checkbox" value="{recipient.id}"
+                                       data-recipient-checkbox
+                                       {#if selected.contains(recipient.id)}checked{/if}/>
+                                <span class="picker-email">{recipient.email}</span>
+                                {#if recipient.name}<span class="picker-name">{recipient.name}</span>{/if}
+                                {#if recipient.company}<span class="picker-company">{recipient.company}</span>{/if}
+                            </label>
+                        </li>
+                    {/for}
+                </ul>
+            {/if}
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">{#if editing}Save changes{:else}Create campaign{/if}</button>
+        <a class="btn btn-ghost" href="/campaigns">Cancel</a>
+    </div>
+</form>
+{/body}
+{/include}

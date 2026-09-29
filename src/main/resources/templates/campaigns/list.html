@@ -1,0 +1,54 @@
+{#include layout/base.html}
+{#title}Campaigns{/title}
+{#body}
+<header class="page-head">
+    <h1>Campaigns</h1>
+    <a class="btn btn-primary" href="/campaigns/new">New campaign</a>
+</header>
+
+<section class="panel">
+    {#if campaigns.isEmpty()}
+        <div class="empty">
+            <p>No campaigns yet.</p>
+            <p class="muted">A campaign pairs one template with one audience and can be sent repeatedly.</p>
+            <a class="btn btn-primary" href="/campaigns/new">Create the first campaign</a>
+        </div>
+    {:else}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Recipients</th>
+                <th>Jobs</th>
+                <th>Updated</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {#for campaign in campaigns}
+                <tr>
+                    <td><a href="/campaigns/{campaign.id}">{campaign.name}</a></td>
+                    <td>{ui.truncate(campaign.subject, 48)}</td>
+                    <td><span class="{ui.badge(campaign.status)}">{campaign.status}</span></td>
+                    <td>{campaign.recipientCount}</td>
+                    <td>{campaign.totalJobs}</td>
+                    <td class="muted">{ui.ago(campaign.updatedAt)}</td>
+                    <td class="cell-actions">
+                        <a class="btn btn-small" href="/campaigns/{campaign.id}">Open</a>
+                        <a class="btn btn-small btn-ghost" href="/campaigns/{campaign.id}/edit">Edit</a>
+                        <form method="post" action="/campaigns/{campaign.id}/delete"
+                              data-confirm="Delete campaign &quot;{campaign.name}&quot;? Its jobs are kept.">
+                            <button class="btn btn-small btn-danger" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {/for}
+            </tbody>
+        </table>
+        {#include layout/pager.html/}
+    {/if}
+</section>
+{/body}
+{/include}

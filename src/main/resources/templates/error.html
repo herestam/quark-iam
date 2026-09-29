@@ -1,0 +1,23 @@
+{!
+  Standalone error page. Deliberately does not include the sidebar: it has to
+  render even when the failure happened while building the layout data.
+!}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{status} &middot; Email Campaign Manager</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/app.css"/>
+</head>
+<body class="error-page">
+<main class="error-card">
+    <p class="error-status">{status}</p>
+    <h1>{#if status == 404}Not found{:elseif status == 400}That request was not valid{:elseif status == 409}Not allowed{:elseif status == 502}Email provider error{:else}Something went wrong{/if}</h1>
+    {#if code}<p class="error-code">{code}</p>{/if}
+    <p class="error-message">{message}</p>
+    <p><a class="btn btn-primary" href="/">Back to the dashboard</a></p>
+</main>
+</body>
+</html>

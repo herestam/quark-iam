@@ -1,0 +1,51 @@
+{!
+  Template preview. The HTML is shown twice on purpose: once as escaped source
+  so the author can read the markup, and once rendered inside a sandboxed
+  iframe so no template can touch the surrounding page.
+!}
+{#include layout/base.html}
+{#title}Preview: {template.name}{/title}
+{#body}
+<header class="page-head">
+    <div>
+        <h1>{template.name}</h1>
+        <p class="muted">Subject: {preview.subject}</p>
+    </div>
+    <div class="head-actions">
+        {#if editing}
+            <a class="btn btn-ghost" href="/templates">Back to editor</a>
+        {:else}
+            <a class="btn btn-ghost" href="/templates/{template.id}/edit">Edit</a>
+            <a class="btn btn-ghost" href="/templates">All templates</a>
+        {/if}
+    </div>
+</header>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Rendered for {name} at {company}</h2>
+    </div>
+    <iframe class="preview-frame" title="Rendered email preview" sandbox srcdoc="{preview.html}"></iframe>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Plain text alternative</h2>
+    </div>
+    <pre class="code-block">{preview.text}</pre>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Substituted variables</h2>
+    </div>
+    {#if preview.variables.isEmpty()}
+        <p class="muted">This template uses no placeholders.</p>
+    {:else}
+        <ul class="chips">
+            {#for variable in preview.variables}<li><code>{variable}</code></li>{/for}
+        </ul>
+    {/if}
+</section>
+{/body}
+{/include}

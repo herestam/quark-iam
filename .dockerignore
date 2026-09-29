@@ -1,5 +1,11 @@
+# Multi-stage build: the image compiles the project itself, so the build
+# context only needs sources. Build output and secrets stay out.
 *
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+!.mvn
+!.mvn/**
+!mvnw
+!mvnw.cmd
+!pom.xml
+!src
+!src/**
+!.env.example
